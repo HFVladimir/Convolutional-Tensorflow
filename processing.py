@@ -8,11 +8,12 @@ import os.path
 import re
 import hashlib
 import numpy as np
+import cv2
 from PIL import Image
 import matplotlib.image as mpimg
 
 # We know that MNIST images are 28 pixels in each dimension.
-img_size = 28
+img_size = 300
 
 # Images are stored in one-dimensional arrays of this length.
 img_size_flat = img_size * img_size
@@ -52,8 +53,26 @@ def plot_images(images, cls_true, cls_pred = None):
     # in a single Notebook cell.
     plt.show()
 
+
+def resize(image, newside):
+    height, width, depth = image.shape
+    new_height = newside
+    new_width = newside
+    if height > width:
+        new_height = int(newside * height / width)
+    else:
+        new_width = int(newside * width / height)
+    print(new_height)
+    print(new_width)
+    resized_img = cv2.resize(image, (new_width, new_height))
+    height_offset = int((new_height - newside) / 2)
+    width_offset = int((new_width - newside) / 2)
+    cropped_img = resized_img[height_offset:height_offset + newside,
+                  width_offset:width_offset + newside]
+    return cropped_img
+
 def plot_image(image):
-    plt.imshow(image.reshape(img_shape),
+    plt.imshow(image,
                interpolation='nearest',
                cmap='binary')
     plt.show()
@@ -91,6 +110,7 @@ def create_image_lists(image_dir, testing_percentage, validation_percentage):
       continue
       logging("Looking for images in '" + dir_name + "'")
     for extension in extensions:
+      print(extension)
       file_glob = os.path.join(image_dir, dir_name, '*.' + extension)
       file_list.extend(gfile.Glob(file_glob))
     if not file_list:
@@ -132,8 +152,6 @@ def create_image_lists(image_dir, testing_percentage, validation_percentage):
         testing_images.append(base_name)
       else:
         training_images.append(base_name)
-   # img = Image.open(file_name)
-  #  plot_image(img)
     result[label_name] = {
         'dir': dir_name,
         'training': training_images,
@@ -154,10 +172,10 @@ def showMnist():
     # Get the true classes for those images.
     cls_true = data.test.cls[0:9]
 
-    image = data.test.images[0]
-    print(type(image))
-
-    plot_image(image)
+    img = cv2.imread("C:\\Users\Vladimir\Desktop\img\paper\IMG_20170420_223858.jpg")
+    rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    resized = resize(rgb, 300)
+    plot_image(resized)
 
     # Plot the images and labels using our helper-function above.
    # plot_images(images=images, cls_true=cls_true)
